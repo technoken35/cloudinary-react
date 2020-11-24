@@ -119,6 +119,8 @@ export default class App extends Component {
         ...this.state,
         folderData: await res.data.folders,
       });
+      console.log(this.state);
+      return await res.data.folders;
     } catch (error) {
       console.log(error.message);
     }
@@ -198,7 +200,7 @@ export default class App extends Component {
                   label="Enter New Folder Name"
                   variant="outlined"
                   color="primary"
-                  style={{ paddingBottom: '1rem' }}
+                  style={{ paddingBottom: '1rem', width: '18.5rem' }}
                   onChange={(event) => {
                     this.handleFolderInput(event);
                   }}
@@ -207,7 +209,10 @@ export default class App extends Component {
                   <React.Fragment />
                 ) : (
                   <Button variant="contained" color="secondary" type="submit">
-                    <AddCircleOutlineIcon style={{ paddingRight: '0.5rem' }} />{' '}
+                    <AddCircleOutlineIcon
+                      color="primary"
+                      style={{ paddingRight: '0.5rem' }}
+                    />{' '}
                     Add New Folder To Library
                   </Button>
                 )}
@@ -223,14 +228,10 @@ export default class App extends Component {
                   value: newValue,
                   inputValue: newValue,
                 });
-
-                console.log(this.state.inputValue, 'input value');
-                console.log(this.state.newValue, 'new value');
               }}
               inputValue={this.state.inputValue}
               onInputChange={(event, newInputValue) => {
                 this.setState({ ...this.state, inputValue: newInputValue });
-                console.log(this.state.inputValue);
               }}
               id="controllable-states-demo"
               getOptionLabel={(option) => option.name}
@@ -271,7 +272,7 @@ export default class App extends Component {
               <CloudUploadIcon style={{ paddingRight: '0.5rem' }} /> Upload
             </Button>
             <Box marginBottom="5rem">
-              <RecentImages />
+              <RecentImages jobFolders={this.state.folderData} />
             </Box>
           </Box>
           <Snackbar open={this.state.newFolderSuccess} autoHideDuration={6000}>

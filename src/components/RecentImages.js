@@ -5,6 +5,8 @@ import ListSubheader from '@material-ui/core/ListSubheader';
 import IconButton from '@material-ui/core/IconButton';
 import { Image } from 'cloudinary-react';
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+
 import Axios from 'axios';
 import Skeleton from '@material-ui/lab/Skeleton';
 import Modal from '@material-ui/core/Modal';
@@ -21,6 +23,12 @@ import Dialog from '@material-ui/core/Dialog';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import UndoIcon from '@material-ui/icons/Undo';
 import VisibilityIcon from '@material-ui/icons/Visibility';
+import InputLabel from '@material-ui/core/InputLabel';
+import FormHelperText from '@material-ui/core/FormHelperText';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
+import Box from '@material-ui/core/Box';
 
 const baseUrl = 'https://desolate-everglades-01373.herokuapp.com';
 
@@ -52,6 +60,13 @@ const modalStyle = {
 const skeletonWidth = '50%';
 const skeletonHeight = '13.125rem';
 
+const transactionsWrapper = {
+  //padding: '2rem',
+  //marginBottom: '1rem',
+  //minHeight: '60vh',
+  //gap: '2rem',
+};
+
 /* handleOpen(){
 
 } */
@@ -63,7 +78,56 @@ export default class RecentImages extends Component {
     imgData: [],
     open: false,
     currentImg: '',
+    dataView: 'Recent',
+    folderData: [],
+    imgDataTest: [],
   };
+
+  async handleFolders() {
+    if (this.state.dataView === 'Recent') {
+      this.getAllImgData();
+    } else {
+      this.folderSearch();
+    }
+  }
+
+  async folderSearch() {
+    console.log('folder search fired');
+
+    try {
+      const res = await Axios.get(`${baseUrl}/search`, {
+        folder_name: this.state.dataView,
+      });
+      console.log(await res.request);
+      if ((await res.data) === undefined) {
+        console.log('undefined no resources');
+        console.log(res.data);
+      } else {
+        this.setState({
+          imgData: await res.data,
+        });
+        console.log(res.data);
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
+  async getAllFolders(cb) {
+    try {
+      const res = await Axios.get(`${baseUrl}/folders`);
+
+      //console.log(res.data);
+      this.setState({
+        ...this.state,
+        folderData: await res.data.folders,
+      });
+      console.log(this.state);
+      return await res.data.folders;
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
 
   async getAllImgData(cb) {
     try {
@@ -78,6 +142,15 @@ export default class RecentImages extends Component {
       console.log(error.message);
     }
   }
+
+  handleChange = (event) => {
+    event.preventDefault();
+    this.setState({
+      ...this.state,
+      dataView: event.target.value,
+    });
+    this.handleFolders();
+  };
 
   async deleteImg() {
     try {
@@ -106,7 +179,7 @@ export default class RecentImages extends Component {
     let index = string.search('dna-images/');
     // slice from start of dna-images+ 11 characters. Which is the length of dna-images/ substring
     let correctFormat = string.slice(index + 11);
-    console.log(string, index);
+    //console.log(string, index);
     return correctFormat;
   }
 
@@ -117,20 +190,21 @@ export default class RecentImages extends Component {
 
   componentDidMount(getAllImgData) {
     this.getAllImgData();
+    this.getAllFolders();
+    //this.handleFolders();
   }
 
   render() {
-    if (this.state.imgData === undefined) {
+    if (this.state.imgData[0] === undefined) {
       return (
-        <React.Fragment>
+        <div>
           <Skeleton width={skeletonWidth} height={skeletonHeight}></Skeleton>
           <Skeleton width={skeletonWidth} height={skeletonHeight}></Skeleton>
           <Skeleton width={skeletonWidth} height={skeletonHeight}></Skeleton>
           <Skeleton width={skeletonWidth} height={skeletonHeight}></Skeleton>
           <Skeleton width={skeletonWidth} height={skeletonHeight}></Skeleton>
           <Skeleton width={skeletonWidth} height={skeletonHeight}></Skeleton>
-          {console.log(this.state.imgData)}
-        </React.Fragment>
+        </div>
       );
     } else {
       return (
@@ -138,36 +212,50 @@ export default class RecentImages extends Component {
           <div style={rootStyle}>
             <GridList cols={2} cellHeight={180} style={gridListStyle}>
               <GridListTile key="Subheader" cols={2} style={{ height: 'auto' }}>
-                <ListSubheader component="div">Recent Images</ListSubheader>
+                <div style={transactionsWrapper}>
+                  <Box
+                    marginTop="1rem"
+                    display="flex"
+                    justifyContent="flex-end"
+                  >
+                    <FormControl>
+                      <InputLabel
+                        shrink
+                        id="demo-simple-select-placeholder-label-label"
+                      >
+                        View
+                      </InputLabel>
+                      <Select
+                        labelId="demo-simple-select-placeholder-label-label"
+                        id="demo-simple-select-placeholder-label"
+                        value={this.state.dataView}
+                        onChange={this.handleChange}
+                        displayEmpty
+                        defaultValue="All"
+                      >
+                        <MenuItem value={'Recent'}>Recent Images</MenuItem>
+                        {this.state.folderData[0] === undefined ? (
+                          <MenuItem>Loading...</MenuItem>
+                        ) : (
+                          this.state.folderData.map((folder) => (
+                            <MenuItem value={folder.path}>
+                              {folder.name}
+                            </MenuItem>
+                          ))
+                        )}
+                      </Select>
+                      <FormHelperText>Select History View</FormHelperText>
+                    </FormControl>
+                  </Box>
+                  {this.state.dataView === 'Recent' ? (
+                    <p>Recent Images </p>
+                  ) : (
+                    <p>{this.state.dataView}</p>
+                  )}
+                </div>
               </GridListTile>
               {this.state.imgData[0] === undefined ? (
-                <React.Fragment>
-                  <Skeleton
-                    width={skeletonWidth}
-                    height={skeletonHeight}
-                  ></Skeleton>
-                  <Skeleton
-                    width={skeletonWidth}
-                    height={skeletonHeight}
-                  ></Skeleton>
-                  <Skeleton
-                    width={skeletonWidth}
-                    height={skeletonHeight}
-                  ></Skeleton>
-                  <Skeleton
-                    width={skeletonWidth}
-                    height={skeletonHeight}
-                  ></Skeleton>
-                  <Skeleton
-                    width={skeletonWidth}
-                    height={skeletonHeight}
-                  ></Skeleton>
-                  <Skeleton
-                    width={skeletonWidth}
-                    height={skeletonHeight}
-                  ></Skeleton>
-                  {console.log(this.state.imgData)}
-                </React.Fragment>
+                <p></p>
               ) : (
                 this.state.imgData.map((cloudinaryImg) => (
                   <React.Fragment>
@@ -181,7 +269,7 @@ export default class RecentImages extends Component {
                         title={this.formatString(cloudinaryImg.public_id)}
                         subtitle={this.formatDate(cloudinaryImg.created_at)}
                         actionIcon={
-                          <React.Fragment>
+                          <Box component="span">
                             <IconButton
                               aria-label={`info about subtitle`}
                               style={iconStyle}
@@ -196,6 +284,8 @@ export default class RecentImages extends Component {
                                   this.state.currentImg,
                                   'current image'
                                 );
+
+                                console.log(this.props);
                               }}
                             >
                               <VisibilityIcon />
@@ -212,7 +302,7 @@ export default class RecentImages extends Component {
                             >
                               <DeleteIcon />
                             </IconButton>
-                          </React.Fragment>
+                          </Box>
                         }
                       />
 
@@ -309,6 +399,10 @@ export default class RecentImages extends Component {
     }
   }
 }
+
+RecentImages.propTypes = {
+  jobFolders: PropTypes.array,
+};
 
 /* 
 
