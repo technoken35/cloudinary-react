@@ -1,12 +1,10 @@
 import GridList from '@material-ui/core/GridList';
 import GridListTile from '@material-ui/core/GridListTile';
 import GridListTileBar from '@material-ui/core/GridListTileBar';
-import ListSubheader from '@material-ui/core/ListSubheader';
 import IconButton from '@material-ui/core/IconButton';
 import { Image } from 'cloudinary-react';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-
 import Axios from 'axios';
 import Skeleton from '@material-ui/lab/Skeleton';
 import Modal from '@material-ui/core/Modal';
