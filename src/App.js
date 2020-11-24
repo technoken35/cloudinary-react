@@ -82,10 +82,10 @@ export default class App extends Component {
             textDark: '#000000',
             textLight: '#FFFFFF',
             link: '#C52A3A',
-            action: '#FF620C',
+            action: '#ef534e',
             inactiveTabIcon: '#0E2F5A',
             error: '#F44235',
-            inProgress: '#0078FF',
+            inProgress: '#80e27e',
             complete: '#20B832',
             sourceBg: '#E4EBF1',
           },
@@ -119,7 +119,6 @@ export default class App extends Component {
         ...this.state,
         folderData: await res.data.folders,
       });
-      console.log(this.state);
       return await res.data.folders;
     } catch (error) {
       console.log(error.message);
@@ -138,7 +137,6 @@ export default class App extends Component {
       new_folder_name: this.state.newFolderInput,
     });
 
-    console.log(res.data);
     if (res.data.success) {
       this.setState({
         ...this.state,
@@ -263,10 +261,6 @@ export default class App extends Component {
                     noInputOnSubmit: false,
                   });
                 }, 3000);
-                console.log(
-                  this.state.inputValue,
-                  'upload component being called'
-                );
               }}
             >
               <CloudUploadIcon style={{ paddingRight: '0.5rem' }} /> Upload

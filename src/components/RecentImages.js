@@ -6,7 +6,6 @@ import { Image } from 'cloudinary-react';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Axios from 'axios';
-import Skeleton from '@material-ui/lab/Skeleton';
 import Modal from '@material-ui/core/Modal';
 import Fade from '@material-ui/core/Fade';
 import Button from '@material-ui/core/Button';
@@ -27,6 +26,7 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import Box from '@material-ui/core/Box';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 const baseUrl = 'https://desolate-everglades-01373.herokuapp.com';
 
@@ -47,6 +47,7 @@ const gridListStyle = {
 
 const iconStyle = {
   color: 'rgba(255, 255, 255, 0.54)',
+  padding: '0.2rem',
 };
 
 const modalStyle = {
@@ -54,9 +55,6 @@ const modalStyle = {
   alignItems: 'center',
   justifyContent: 'center',
 };
-
-const skeletonWidth = '50%';
-const skeletonHeight = '13.125rem';
 
 const transactionsWrapper = {
   //padding: '2rem',
@@ -78,33 +76,31 @@ export default class RecentImages extends Component {
     currentImg: '',
     dataView: 'Recent',
     folderData: [],
+    emptyFolder: false,
     imgDataTest: [],
   };
 
-  async handleFolders() {
-    if (this.state.dataView === 'Recent') {
+  async handleFolders(folder) {
+    if (folder === 'Recent') {
       this.getAllImgData();
     } else {
-      this.folderSearch();
+      this.folderSearch(folder);
     }
   }
 
-  async folderSearch() {
+  async folderSearch(folder) {
     console.log('folder search fired');
 
     try {
-      const res = await Axios.get(`${baseUrl}/search`, {
-        folder_name: this.state.dataView,
+      const res = await Axios.post(`${baseUrl}/search`, {
+        folder_name: folder,
       });
-      console.log(await res.request);
-      if ((await res.data) === undefined) {
-        console.log('undefined no resources');
-        console.log(res.data);
+      if ((await res.data.resources) === undefined) {
+        console.log(res);
       } else {
         this.setState({
-          imgData: await res.data,
+          imgData: await res.data.resources,
         });
-        console.log(res.data);
       }
     } catch (error) {
       console.log(error.message);
@@ -120,7 +116,6 @@ export default class RecentImages extends Component {
         ...this.state,
         folderData: await res.data.folders,
       });
-      console.log(this.state);
       return await res.data.folders;
     } catch (error) {
       console.log(error.message);
@@ -135,7 +130,6 @@ export default class RecentImages extends Component {
       this.setState({
         imgData: await res.data,
       });
-      console.log(this.state);
     } catch (error) {
       console.log(error.message);
     }
@@ -143,11 +137,12 @@ export default class RecentImages extends Component {
 
   handleChange = (event) => {
     event.preventDefault();
+    console.log(event.target.value);
     this.setState({
       ...this.state,
       dataView: event.target.value,
     });
-    this.handleFolders();
+    this.handleFolders(event.target.value);
   };
 
   async deleteImg() {
@@ -156,12 +151,13 @@ export default class RecentImages extends Component {
         publicIDs: this.state.selectedImg,
       });
 
+      console.log(res);
+
       this.setState({
         ...this.state,
         showDeletePrompt: false,
       });
 
-      console.log(res.data);
       window.location.reload();
     } catch (error) {
       this.setState({
@@ -194,14 +190,24 @@ export default class RecentImages extends Component {
 
   render() {
     if (this.state.imgData[0] === undefined) {
+      setTimeout(() => {
+        // another check after the end of the timeout
+        if (this.state.imgData[0] === undefined) {
+          this.setState({
+            emptyFolder: true,
+          });
+          // ! You need to handle a empty folder alot better
+          window.location.reload();
+        }
+      }, 10000);
       return (
-        <div>
-          <Skeleton width={skeletonWidth} height={skeletonHeight}></Skeleton>
-          <Skeleton width={skeletonWidth} height={skeletonHeight}></Skeleton>
-          <Skeleton width={skeletonWidth} height={skeletonHeight}></Skeleton>
-          <Skeleton width={skeletonWidth} height={skeletonHeight}></Skeleton>
-          <Skeleton width={skeletonWidth} height={skeletonHeight}></Skeleton>
-          <Skeleton width={skeletonWidth} height={skeletonHeight}></Skeleton>
+        <div
+          style={{
+            // width: '45vw',
+            display: 'flex',
+          }}
+        >
+          <CircularProgress />
         </div>
       );
     } else {
@@ -232,23 +238,21 @@ export default class RecentImages extends Component {
                         defaultValue="All"
                       >
                         <MenuItem value={'Recent'}>Recent Images</MenuItem>
-                        {this.state.folderData[0] === undefined ? (
-                          <MenuItem>Loading...</MenuItem>
-                        ) : (
-                          this.state.folderData.map((folder) => (
-                            <MenuItem value={folder.path}>
-                              {folder.name}
-                            </MenuItem>
-                          ))
-                        )}
+                        {this.state.folderData[0] === undefined
+                          ? ''
+                          : this.state.folderData.map((folder) => (
+                              <MenuItem value={folder.path}>
+                                {folder.name}
+                              </MenuItem>
+                            ))}
                       </Select>
-                      <FormHelperText>Select History View</FormHelperText>
+                      <FormHelperText>Select Image View</FormHelperText>
                     </FormControl>
                   </Box>
                   {this.state.dataView === 'Recent' ? (
                     <p>Recent Images </p>
                   ) : (
-                    <p>{this.state.dataView}</p>
+                    <p>{this.formatString(this.state.dataView)}</p>
                   )}
                 </div>
               </GridListTile>
@@ -259,7 +263,7 @@ export default class RecentImages extends Component {
                   <React.Fragment>
                     <GridListTile style={{}} key={cloudinaryImg.asset_id}>
                       <Image
-                        style={{ height: 'auto', width: 375, margin: '0 auto' }}
+                        style={{ height: 'auto', width: 360, margin: '0 auto' }}
                         publicId={cloudinaryImg.public_id}
                         alt={'alt'}
                       />
@@ -278,12 +282,6 @@ export default class RecentImages extends Component {
                                   open: true,
                                   currentImg: cloudinaryImg.public_id,
                                 });
-                                console.log(
-                                  this.state.currentImg,
-                                  'current image'
-                                );
-
-                                console.log(this.props);
                               }}
                             >
                               <VisibilityIcon />
@@ -375,7 +373,6 @@ export default class RecentImages extends Component {
                           button
                           onClick={() => {
                             this.deleteImg(this.state.selectedImg);
-                            console.log(this.state.selectedImg, 'public id');
                           }}
                         >
                           <ListItemAvatar>
