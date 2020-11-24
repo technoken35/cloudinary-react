@@ -276,13 +276,6 @@ export default class RecentImages extends Component {
                               aria-label={`info about subtitle`}
                               style={iconStyle}
                               href={cloudinaryImg.secure_url}
-                              onClick={() => {
-                                this.setState({
-                                  ...this.state,
-                                  open: true,
-                                  currentImg: cloudinaryImg.public_id,
-                                });
-                              }}
                             >
                               <VisibilityIcon />
                             </IconButton>
