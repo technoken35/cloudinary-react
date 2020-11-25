@@ -170,8 +170,6 @@ export default class App extends Component {
           showDeleteSuccess: false,
         });
       }, 3000);
-
-      this.getAllFolders();
     } catch (error) {
       console.log(error.message);
     }
