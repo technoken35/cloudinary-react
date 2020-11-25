@@ -11,6 +11,16 @@ import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+import DeleteIcon from '@material-ui/icons/Delete';
+import Avatar from '@material-ui/core/Avatar';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import ListItemText from '@material-ui/core/ListItemText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Dialog from '@material-ui/core/Dialog';
+import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
+import UndoIcon from '@material-ui/icons/Undo';
 
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 
@@ -24,6 +34,7 @@ const theme = createMuiTheme({
       main: '#ef534e',
       dark: '#b61825',
       contrastText: '#fff',
+      danger: '#ff9100',
     },
     secondary: {
       light: '#ffff',
@@ -46,6 +57,8 @@ export default class App extends Component {
     newFolderInput: '',
     newFolderFailure: false,
     noInputOnSubmit: false,
+    showDeletePrompt: false,
+    showDeleteSuccess: false,
   };
 
   showUploadWidget() {
@@ -132,6 +145,38 @@ export default class App extends Component {
     });
   }
 
+  async deleteFolder(folder) {
+    try {
+      const res = await Axios.post(`${baseUrl}/delete-folder`, {
+        pathName: folder,
+      });
+
+      console.log(res, 'reponse from deleted folder');
+
+      if (
+        (await res.data.deleted) !== `Can't find folder with path ${folder}`
+      ) {
+        this.setState({
+          ...this.state,
+          showDeletePrompt: false,
+          inputValue: '',
+          showDeleteSuccess: true,
+        });
+        this.getAllFolders();
+      }
+
+      setTimeout(() => {
+        this.setState({
+          showDeleteSuccess: false,
+        });
+      }, 3000);
+
+      this.getAllFolders();
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
   async handleNewFolderSubmit() {
     const res = await Axios.post(`${baseUrl}/new-folder`, {
       new_folder_name: this.state.newFolderInput,
@@ -148,7 +193,7 @@ export default class App extends Component {
           ...this.state,
           newFolderSuccess: false,
         });
-        this.forceUpdate();
+        this.getAllFolders();
       }, 3000);
     } else {
       this.setState({
@@ -183,7 +228,7 @@ export default class App extends Component {
             alignItems="center"
             justifyContent="center"
           >
-            <h1 style={{ textAlign: 'center' }}>DNA Media Managment</h1>
+            <h2 style={{ textAlign: 'center' }}>DNA Media Managment</h2>
 
             <Box marginBottom="1rem">
               <form
@@ -242,11 +287,32 @@ export default class App extends Component {
                 />
               )}
             />
+            {this.state.inputValue === '' ? (
+              <React.Fragment />
+            ) : (
+              <Button
+                onClick={() => {
+                  this.setState({
+                    ...this.state,
+                    showDeletePrompt: true,
+                  });
+                }}
+                style={{ marginTop: '1rem' }}
+                variant="contained"
+                type="submit"
+              >
+                <DeleteIcon
+                  color="primary"
+                  style={{ paddingRight: '0.5rem' }}
+                />{' '}
+                Delete folder
+              </Button>
+            )}
             <Button
               id="myId"
               variant="contained"
               color="primary"
-              style={{ margin: '2rem 0 2rem 0' }}
+              style={{ margin: '2rem 0 2rem 0', width: '12rem' }}
               onClick={() => {
                 this.state.inputValue === ''
                   ? this.setState({
@@ -284,6 +350,52 @@ export default class App extends Component {
               You Must Choose A Folder
             </MuiAlert>
           </Snackbar>
+          <Snackbar open={this.state.showDeleteSuccess} autoHideDuration={6000}>
+            <MuiAlert elevation={6} variant="filled" severity="warning">
+              Folder Was Permanently Deleted!
+            </MuiAlert>
+          </Snackbar>
+          <Dialog
+            aria-labelledby="simple-dialog-title"
+            open={this.state.showDeletePrompt}
+          >
+            <DialogTitle id="simple-dialog-title">
+              Are you sure you want to delete?
+            </DialogTitle>
+            <List>
+              <ListItem
+                button
+                onClick={() =>
+                  this.setState({
+                    ...this.state,
+                    showDeletePrompt: false,
+                  })
+                }
+              >
+                <ListItemAvatar>
+                  <Avatar>
+                    <UndoIcon />
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText primary={'Keep'} />
+              </ListItem>
+
+              <ListItem
+                autoFocus
+                button
+                onClick={() => {
+                  this.deleteFolder(this.state.value.path);
+                }}
+              >
+                <ListItemAvatar>
+                  <Avatar>
+                    <DeleteForeverIcon />
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText primary="Delete" />
+              </ListItem>
+            </List>
+          </Dialog>
         </CloudinaryContext>
       </ThemeProvider>
     );

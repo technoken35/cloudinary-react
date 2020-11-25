@@ -36,6 +36,7 @@ const rootStyle = {
   justifyContent: 'center',
   alignItems: 'center',
   overflow: 'hidden',
+  //padding: '2rem',
 };
 
 const gridListStyle = {
@@ -250,7 +251,7 @@ export default class RecentImages extends Component {
                     </FormControl>
                   </Box>
                   {this.state.dataView === 'Recent' ? (
-                    <p>Recent Images </p>
+                    <p style={{ marginLeft: '0.5rem' }}>Recent Images </p>
                   ) : (
                     <p>{this.formatString(this.state.dataView)}</p>
                   )}
@@ -319,9 +320,7 @@ export default class RecentImages extends Component {
                             </h2>
 
                             <Image publicId={cloudinaryImg.public_id}></Image>
-                            <p id="transition-modal-description">
-                              react-transition-group animates me.
-                            </p>
+                            <p id="transition-modal-description"></p>
                             <Button
                               onClick={() => {
                                 /* this.setState({
@@ -341,7 +340,7 @@ export default class RecentImages extends Component {
                       open={this.state.showDeletePrompt}
                     >
                       <DialogTitle id="simple-dialog-title">
-                        Are you sure you want to delete
+                        Are you sure you want to delete?
                       </DialogTitle>
                       <List>
                         <ListItem
