@@ -28,7 +28,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Box from '@material-ui/core/Box';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
-const baseUrl = 'https://desolate-everglades-01373.herokuapp.com';
+const baseUrl = 'https://cryptic-depths-40364.herokuapp.com';
 
 const rootStyle = {
   display: 'flex',
@@ -171,9 +171,9 @@ export default class RecentImages extends Component {
   }
 
   formatString(string) {
-    let index = string.search('dna-images/');
+    let index = string.search('sample/');
     // slice from start of dna-images+ 11 characters. Which is the length of dna-images/ substring
-    let correctFormat = string.slice(index + 11);
+    let correctFormat = string.slice(index + 9);
     //console.log(string, index);
     return correctFormat;
   }

@@ -30,9 +30,9 @@ const theme = createMuiTheme({
       default: '#F3F4F9',
     },
     primary: {
-      light: 'ff867a',
-      main: '#ef534e',
-      dark: '#b61825',
+      light: '#b2fab4',
+      main: '#81c784',
+      dark: '#519657',
       contrastText: '#fff',
       danger: '#ff9100',
     },
@@ -47,7 +47,7 @@ const theme = createMuiTheme({
 
 const cloudinary = window.cloudinary;
 
-const baseUrl = 'https://desolate-everglades-01373.herokuapp.com';
+const baseUrl = 'https://cryptic-depths-40364.herokuapp.com';
 
 export default class App extends Component {
   state = {
@@ -64,7 +64,7 @@ export default class App extends Component {
   showUploadWidget() {
     cloudinary.openUploadWidget(
       {
-        cloudName: 'dna-hvac',
+        cloudName: 'djjmms56h',
         uploadPreset: 'oy9pw0ss',
         maxFiles: 10,
         sources: [
@@ -90,15 +90,15 @@ export default class App extends Component {
           palette: {
             window: '#FFFFFF',
             windowBorder: '#90A0B3',
-            tabIcon: '#C52A3A',
-            menuIcons: '#5A616A',
+            tabIcon: '#519657',
+            menuIcons: '#519657',
             textDark: '#000000',
             textLight: '#FFFFFF',
-            link: '#C52A3A',
-            action: '#ef534e',
-            inactiveTabIcon: '#0E2F5A',
+            link: '#81C784',
+            action: '#81C784',
+            inactiveTabIcon: '#000000',
             error: '#F44235',
-            inProgress: '#80e27e',
+            inProgress: '#0078FF',
             complete: '#20B832',
             sourceBg: '#E4EBF1',
           },
@@ -219,14 +219,14 @@ export default class App extends Component {
     } else { */
     return (
       <ThemeProvider theme={theme}>
-        <CloudinaryContext cloudName="dna-hvac">
+        <CloudinaryContext cloudName="djjmms56h">
           <Box
             display="flex"
             flexDirection="column"
             alignItems="center"
             justifyContent="center"
           >
-            <h2 style={{ textAlign: 'center' }}>DNA Media Managment</h2>
+            <h2 style={{ textAlign: 'center' }}>Cloudinary Media Managment</h2>
 
             <Box marginBottom="1rem">
               <form
